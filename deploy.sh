@@ -12,13 +12,17 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+# Determine Docker Compose command
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+else
     echo "❌ Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
 
-echo "✅ Docker and Docker Compose are installed"
+echo "✅ Docker and Docker Compose are installed (using $DOCKER_COMPOSE_CMD)"
 echo ""
 
 # Check if docker-compose.yml exists
@@ -45,7 +49,7 @@ fi
 
 echo ""
 echo "🔨 Building Docker images..."
-docker-compose build
+$DOCKER_COMPOSE_CMD build
 
 if [ $? -ne 0 ]; then
     echo "❌ Build failed. Please check the error messages above."
@@ -56,7 +60,7 @@ echo ""
 echo "✅ Build completed successfully"
 echo ""
 echo "🚀 Starting services..."
-docker-compose up -d
+$DOCKER_COMPOSE_CMD up -d
 
 if [ $? -ne 0 ]; then
     echo "❌ Failed to start services. Please check the error messages above."
@@ -67,7 +71,7 @@ echo ""
 echo "✅ Services started successfully!"
 echo ""
 echo "📊 Container Status:"
-docker-compose ps
+$DOCKER_COMPOSE_CMD ps
 echo ""
 echo "🌐 Access Points:"
 echo "  - Frontend: http://localhost"
@@ -75,8 +79,8 @@ echo "  - Backend API: http://localhost:5000/api"
 echo "  - Health Check: http://localhost:5000/api/health"
 echo ""
 echo "📝 Useful Commands:"
-echo "  - View logs: docker-compose logs -f"
-echo "  - Stop services: docker-compose down"
-echo "  - Restart services: docker-compose restart"
+echo "  - View logs: $DOCKER_COMPOSE_CMD logs -f"
+echo "  - Stop services: $DOCKER_COMPOSE_CMD down"
+echo "  - Restart services: $DOCKER_COMPOSE_CMD restart"
 echo ""
 echo "✨ Deployment complete! Your application is now running."
